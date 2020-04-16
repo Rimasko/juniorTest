@@ -11,8 +11,8 @@
 сначала скопировать данный репозиторий 
 
 ~~~
-$ git clone какая то ссылка
-$ cd JuniorTest
+$ git clone https://github.com/Rimasko/juniorTest.git
+$ cd juniorTest
 ~~~
 запустить сборку docker-compose
 
