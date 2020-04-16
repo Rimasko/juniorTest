@@ -26,10 +26,14 @@ $ sudo docker-compose build
 $ sudo docker-compose up
 ~~~
 
-после необходимо првести миграции в базу данных 
+
 для начала узнаем ID нашего контейнера
+imagename = juniortest_server
 ~~~
 $ sudo docker ps
+~~~
+после необходимо првести миграции в базу данных и собрать статику
+~~~
 $ sudo docker exec -i (ID) python manage.py makemigrations
 $ sudo docker exec -i (ID) python manage.py migrate
 $ sudo docker exec -i (ID) python manage.py collectstatic
