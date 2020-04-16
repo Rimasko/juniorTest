@@ -47,7 +47,7 @@ class DealsAPIView(mixins.ListModelMixin,
                     "Desc": "deals must be a csv file"}
             return Response(data, status=403)
         data = self.load_deal(deals)
-        cache.clear() # очищает кеш полнолстью
+        cache.clear()  # очищает кеш полнолстью
         return Response(data, status=200)
 
     @staticmethod
