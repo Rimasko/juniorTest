@@ -1,13 +1,13 @@
-#ТЕСТОВОЕ ЗАДАНИЕ на позицию Junior Backend разработчик 
+# ТЕСТОВОЕ ЗАДАНИЕ на позицию Junior Backend разработчик 
 
-####Установка Docker
+#### Установка Docker
 * [Подробное руководство по установке docker](https://docs.docker.com/install/linux/docker-ce/ubuntu/)
 
 ##### Установка docker-compose
 
 * [Подробное руководство по установке docker-compose](https://docs.docker.com/compose/install/)
 
-##запуск сервиса
+## запуск сервиса
 сначала скопировать данный репозиторий 
 
 ~~~
