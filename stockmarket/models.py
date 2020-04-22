@@ -1,12 +1,15 @@
 from django.db import models
 
+from stockmarket.managers import CustomerManager
+
 
 class Customer(models.Model):
     """
     модель покупателя
     """
-    username = models.CharField("Логин", max_length=30)
-    spent_money = models.IntegerField("потрачено за весь период", default=0)
+    username = models.CharField(verbose_name="Логин", max_length=30)
+    spent_money = models.IntegerField(verbose_name="потрачено за весь период", default=0)
+    objects = CustomerManager()
 
     def __str__(self):
         return self.username
@@ -18,21 +21,25 @@ class Customer(models.Model):
 
     def get_gems(self):
         rich_set = Customer.objects.all()[:5]
-        current_gems = self.deals.values('item').distinct()
-        gems_list = [gem["item"] for gem in current_gems]
+        gems_list = set(self.deals.values_list('item', flat=True))
         gems = []
         for rich in rich_set:
             if rich.id != self.id:
-                intersection = Deal.objects.filter(item__in=gems_list, customer=rich).values('item').distinct()
-                gems +=([gem["item"] for gem in intersection])
-        return gems
+                intersection = set(Deal.objects.filter(item__in=gems_list,
+                                                       customer=rich).values_list('item',
+                                                                                  flat=True))
+                gems += intersection
+        return set(gems)
 
 
 class Deal(models.Model):
     """
     модель сделки
     """
-    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, verbose_name="Клиент", related_name="deals")
+    customer = models.ForeignKey(Customer,
+                                 on_delete=models.CASCADE,
+                                 verbose_name="Клиент",
+                                 related_name="deals")
     item = models.CharField("Наименование товара", max_length=30)
     total = models.PositiveIntegerField("Сумма сделки")
     quantity = models.PositiveSmallIntegerField("количество товара, шт.")
