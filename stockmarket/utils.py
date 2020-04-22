@@ -16,18 +16,25 @@ def load_deals_file_to_db(file):
     if len(set(fieldname) ^ set(deals_reader.fieldnames)) > 0:
         return {"Status": "Error",
                 "Desc": "проверьте правильность колонок файлв 'customer', 'item', 'total', 'quantity', 'date' "}
+
+    list_deals = []
+    customers_dict = {}
+
     for deal_row in deals_reader:
         customer, _ = Customer.objects.get_or_create(username=deal_row["customer"])
         deal_date = datetime.strptime(deal_row["date"], "%Y-%m-%d %H:%M:%S.%f")
-        deal, created = Deal.objects.get_or_create(
+        deal = Deal(
             customer=customer,
             item=deal_row["item"],
             total=int(deal_row["total"]),
             quantity=int(deal_row["quantity"]),
             date=deal_date)
-        if created:
-            customer.spent_money += int(deal_row["total"])
-            deal.save()
+        list_deals.append(deal)
+        customer.spent_money += int(deal_row["total"])
+        customers_dict[customer.username] = customer
+
+    Deal.objects.bulk_create(list_deals)
+    Customer.objects.bulk_update(customers_dict.values())
 
     data = {"Status": "Ok"}
     return data
