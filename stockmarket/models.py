@@ -20,16 +20,11 @@ class Customer(models.Model):
         ordering = ["-spent_money"]
 
     def get_gems(self):
-        rich_set = Customer.objects.all()[:5]
-        gems_list = set(self.deals.values_list('item', flat=True))
-        gems = []
-        for rich in rich_set:
-            if rich.id != self.id:
-                intersection = set(Deal.objects.filter(item__in=gems_list,
-                                                       customer=rich).values_list('item',
-                                                                                  flat=True))
-                gems += intersection
-        return set(gems)
+        rich_list = Customer.objects.exclude(username=self.username)[:4]
+        gems_list = set(self.deals.filter(item__in=Deal.objects.filter(customer__in=rich_list)
+                                          .values_list('item', flat=True))
+                        .values_list('item', flat=True))
+        return set(gems_list)
 
 
 class Deal(models.Model):

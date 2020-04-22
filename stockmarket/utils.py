@@ -17,24 +17,44 @@ def load_deals_file_to_db(file):
         return {"Status": "Error",
                 "Desc": "проверьте правильность колонок файлв 'customer', 'item', 'total', 'quantity', 'date' "}
 
-    list_deals = []
+    # удаляем инфомрацию о старых сделках
+    Customer.objects.all().delete()
+
+    deals_list = []
     customers_dict = {}
+    deals_information = []
 
     for deal_row in deals_reader:
-        customer, _ = Customer.objects.get_or_create(username=deal_row["customer"])
+        name = deal_row["customer"]
+        if name not in customers_dict:
+            customer = Customer(username=name)
+            customers_dict[name] = customer
+        # собираем информацию о сделке
         deal_date = datetime.strptime(deal_row["date"], "%Y-%m-%d %H:%M:%S.%f")
+        deals_information.append({
+            "customer": name,
+            "item": deal_row["item"],
+            'total': int(deal_row["total"]),
+            'quantity': int(deal_row["quantity"]),
+            'date': deal_date
+
+        })
+    # создаются все покупатели
+    Customer.objects.bulk_create(customers_dict.values())
+
+    for deal_row in deals_information:
+        customers_dict[deal_row["customer"]].spent_money += int(deal_row["total"])
         deal = Deal(
-            customer=customer,
+            customer=customers_dict[deal_row["customer"]],
             item=deal_row["item"],
-            total=int(deal_row["total"]),
-            quantity=int(deal_row["quantity"]),
-            date=deal_date)
-        list_deals.append(deal)
-        customer.spent_money += int(deal_row["total"])
-        customers_dict[customer.username] = customer
+            total=deal_row["total"],
+            quantity=deal_row["quantity"],
+            date=deal_row["date"])
+        deals_list.append(deal)
 
-    Deal.objects.bulk_create(list_deals)
-    Customer.objects.bulk_update(customers_dict.values())
-
+    # записываются сделки в базу
+    Deal.objects.bulk_create(deals_list)
+    # обновление потраченных денег
+    Customer.objects.bulk_update(customers_dict.values(), fields=["spent_money"])
     data = {"Status": "Ok"}
     return data
